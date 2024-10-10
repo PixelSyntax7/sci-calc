@@ -23,7 +23,7 @@ Primary = Int
 ArgList = Expr ("," Expr)*
 
 Int = DIGITS
-Float = DIGITS "." DIGITS {"e" | "E"} ["+" | "-"] DIGITS
+Float = DIGITS "." DIGITS
 Func = CHARS
 Const = CHARS
 Var = CHARS
