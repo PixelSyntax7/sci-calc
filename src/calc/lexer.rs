@@ -42,14 +42,26 @@ impl<'a> Lexer<'a> {
                 ch = self.advance();
             }
 
-            if ch != '.' {
+            if ch != '.' && ch != 'e' && ch != 'E' {
                 let value = &self.expr[start..self.cursor];
                 return Ok(Token::INT(value, start));
             }
 
-            ch = self.advance();
-            while ch.is_digit(10) {
+            if ch == '.' {
                 ch = self.advance();
+                while ch.is_digit(10) {
+                    ch = self.advance();
+                }
+            }
+
+            if ch == 'e' || ch == 'E' {
+                ch = self.advance();
+                if ch == '+' || ch == '-' {
+                    ch = self.advance();
+                }
+                while ch.is_digit(10) {
+                    ch = self.advance();
+                }
             }
 
             let value = &self.expr[start..self.cursor];
@@ -134,36 +146,81 @@ impl<'a> Lexer<'a> {
     }
 }
 
-// TODO - add documentation
-// TODO - write tests
+/// Provides the tokens from expression
+pub fn tokenise<'a>(expr: &'a str) -> Result<Vec<Token<'a>>, String> {
+    let mut lexer = Lexer::new(expr);
+    lexer.tokenise()
+}
+
+// TODO - docs
+// TODO - tests
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
-    fn tokenise_valid_tokens() {
-        let expr = "1+2-3*4/55%666^0";
+    fn tokenise_valid_operators() {
+        assert_eq!(tokenise("+"), Ok(vec![Token::PLUS(0), Token::EOF(1)]));
+        assert_eq!(tokenise("-"), Ok(vec![Token::MINUS(0), Token::EOF(1)]));
+        assert_eq!(tokenise("*"), Ok(vec![Token::MUL(0), Token::EOF(1)]));
+        assert_eq!(tokenise("/"), Ok(vec![Token::DIV(0), Token::EOF(1)]));
+        assert_eq!(tokenise("%"), Ok(vec![Token::MOD(0), Token::EOF(1)]));
+        assert_eq!(tokenise("^"), Ok(vec![Token::POW(0), Token::EOF(1)]));
+    }
 
-        let mut lexer = Lexer::new(&expr);
-        let result = lexer.tokenise();
+    #[test]
+    fn tokenise_valid_delimiters() {
+        assert_eq!(tokenise("("), Ok(vec![Token::LPAREN(0), Token::EOF(1)]));
+        assert_eq!(tokenise(")"), Ok(vec![Token::RPAREN(0), Token::EOF(1)]));
+        assert_eq!(tokenise(","), Ok(vec![Token::COMMA(0), Token::EOF(1)]));
+    }
 
-        let expected = Ok(vec![
-            Token::INT("1", 0),
-            Token::PLUS(1),
-            Token::INT("2", 2),
-            Token::MINUS(3),
-            Token::INT("3", 4),
-            Token::MUL(5),
-            Token::INT("4", 6),
-            Token::DIV(7),
-            Token::INT("55", 8),
-            Token::MOD(10),
-            Token::INT("666", 11),
-            Token::POW(14),
-            Token::INT("0", 15),
-            Token::EOF(16),
-        ]);
+    #[test]
+    fn tokenise_valid_integer() {
+        assert_eq!(tokenise("23"), Ok(vec![Token::INT("23", 0), Token::EOF(2)]));
+        assert_eq!(
+            tokenise("0023"),
+            Ok(vec![Token::INT("0023", 0), Token::EOF(4)])
+        );
+        assert_eq!(
+            tokenise("0230"),
+            Ok(vec![Token::INT("0230", 0), Token::EOF(4)])
+        );
+    }
 
-        assert_eq!(result, expected);
+    #[test]
+    fn tokenise_valid_float() {
+        assert_eq!(
+            tokenise("23.5"),
+            Ok(vec![Token::FLOAT("23.5", 0), Token::EOF(4)])
+        );
+        assert_eq!(
+            tokenise("23.500"),
+            Ok(vec![Token::FLOAT("23.500", 0), Token::EOF(6)])
+        );
+        assert_eq!(
+            tokenise("0.05"),
+            Ok(vec![Token::FLOAT("0.05", 0), Token::EOF(4)])
+        );
+    }
+
+    #[test]
+    fn tokenise_valid_scientific_format() {
+        assert_eq!(
+            tokenise("5e10"),
+            Ok(vec![Token::FLOAT("5e10", 0), Token::EOF(4)])
+        );
+        assert_eq!(
+            tokenise("20.0E3"),
+            Ok(vec![Token::FLOAT("20.0E3", 0), Token::EOF(6)])
+        );
+        assert_eq!(
+            tokenise("5e+1"),
+            Ok(vec![Token::FLOAT("5e+1", 0), Token::EOF(4)])
+        );
+        assert_eq!(
+            tokenise("5e-10"),
+            Ok(vec![Token::FLOAT("5e-10", 0), Token::EOF(5)])
+        );
     }
 }

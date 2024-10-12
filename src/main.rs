@@ -61,3 +61,61 @@ fn lexer_main() {
         }
     }
 }
+
+// #[allow(dead_code)]
+// fn parser_main() {
+//     loop {
+//         let mut input = get_expression();
+//         if input == String::from("exit\n") {
+//             break;
+//         }
+
+//         let lexer = Lexer::new(input.as_str());
+//         let tokens = lexer.lex();
+
+//         let mut parser = Parser::new(tokens);
+//         let tree = parser.parse();
+
+//         match tree {
+//             Ok(t) => {
+//                 println!("Tree:");
+//                 println!("{:?}", t);
+//             },
+//             Err(e) => {
+//                 println!("Parsing failed: {:?}", e);
+//                 break;
+//             }
+//         };
+//     }
+// }
+
+// #[allow(dead_code)]
+// fn eval_main() {
+//     loop {
+//         let mut input = get_expression();
+//         if input == String::from("exit\n") {
+//             break;
+//         }
+
+//         let mut lexer = Lexer::new(expr.as_str());
+//         let tokens = lexer.lex();
+
+//         let mut parser = Parser::new(tokens);
+//         let tree = parser.parse();
+
+//         match tree {
+//             Err(e) => {
+//                 println!("Parsing failed: {:?}", e);
+//                 break;
+//             },
+//             Ok(t) => {
+//                 let eval = Eval::new(&tree);
+//                 let value = eval.evaluate();
+
+//                 match value {
+//                     Value::INT(val) => println!("{val}"),
+//                 }
+//             }
+//         };
+//     }
+// }

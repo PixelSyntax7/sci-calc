@@ -8,25 +8,23 @@ Expr = Term
      | "(" Expr ")"
 
 Term = Factor
-     | Term {"+" | "-"} Factor
+     | Term ("+" | "-") Factor
 
 Factor = Primary
-       | Factor {"*" | "/" | "%"} Primary
+       | Factor ("*" | "/" | "%") Primary
        | Primary "^" Factor
 
 Primary = Int
         | Float
         | Func "(" ArgList ")"
         | Const
-        | Var
 
-ArgList = Expr ("," Expr)*
+ArgList = Expr ["," Expr]*
 
 Int = DIGITS
-Float = DIGITS "." DIGITS
+Float = DIGITS "." DIGITS [("e" | "E") [("+" | "-")] DIGITS]
 Func = CHARS
 Const = CHARS
-Var = CHARS
 
 CHAR = "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" | "l" | "m" | "n" | "o" | "p" | "q" | "r" | "s" | "t" | "u" | "v" | "w" | "x" | "y" | "z"
 CHARS = CHAR+
