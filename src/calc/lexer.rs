@@ -12,9 +12,9 @@ impl<'a> Lexer<'a> {
     }
 
     #[allow(dead_code)]
-    pub fn tokenise(&mut self) -> Result<Vec<Token<'a>>, String> {
+    pub fn tokenise(&mut self) -> Result<Vec<Token>, String> {
         let mut found_eof_token = false;
-        let mut tokens: Vec<Token<'a>> = Vec::new();
+        let mut tokens: Vec<Token> = Vec::new();
 
         while !found_eof_token {
             let token = self.next_token()?;
@@ -28,7 +28,7 @@ impl<'a> Lexer<'a> {
         return Ok(tokens);
     }
 
-    pub fn next_token(&mut self) -> Result<Token<'a>, String> {
+    pub fn next_token(&mut self) -> Result<Token, String> {
         let mut ch = self.curr_char();
 
         while ch == ' ' {
@@ -45,7 +45,7 @@ impl<'a> Lexer<'a> {
 
             if ch != '.' && ch != 'e' && ch != 'E' {
                 let value = &self.expr[start..self.cursor];
-                return Ok(Token::INT(value));
+                return Ok(Token::INT(value.parse::<u64>().unwrap()));
             }
 
             if ch == '.' {
@@ -66,7 +66,7 @@ impl<'a> Lexer<'a> {
             }
 
             let value = &self.expr[start..self.cursor];
-            return Ok(Token::FLOAT(value));
+            return Ok(Token::FLOAT(value.parse::<f64>().unwrap()));
         }
 
         if ch.is_ascii_alphabetic() {
@@ -75,7 +75,7 @@ impl<'a> Lexer<'a> {
                 ch = self.advance();
             }
             let value = &self.expr[start..self.cursor];
-            return Ok(Token::NAME(value));
+            return Ok(Token::NAME(String::from(value).to_ascii_lowercase()));
         }
 
         if ch == '+' {
@@ -149,7 +149,7 @@ impl<'a> Lexer<'a> {
 
 /// Provides the tokens from expression
 #[allow(dead_code)]
-pub fn tokenise<'a>(expr: &'a str) -> Result<Vec<Token<'a>>, String> {
+pub fn tokenise<'a>(expr: &'a str) -> Result<Vec<Token>, String> {
     let mut lexer = Lexer::new(expr);
     lexer.tokenise()
 }
@@ -177,14 +177,14 @@ mod tests {
 
     #[test]
     fn tokenise_valid_integer() {
-        assert_eq!(tokenise("23"), Ok(vec![Token::INT("23"), Token::EOF]));
+        assert_eq!(tokenise("23"), Ok(vec![Token::INT(23), Token::EOF]));
         assert_eq!(
             tokenise("0023"),
-            Ok(vec![Token::INT("0023"), Token::EOF])
+            Ok(vec![Token::INT(23), Token::EOF])
         );
         assert_eq!(
             tokenise("0230"),
-            Ok(vec![Token::INT("0230"), Token::EOF])
+            Ok(vec![Token::INT(230), Token::EOF])
         );
     }
 
@@ -192,15 +192,15 @@ mod tests {
     fn tokenise_valid_float() {
         assert_eq!(
             tokenise("23.5"),
-            Ok(vec![Token::FLOAT("23.5"), Token::EOF])
+            Ok(vec![Token::FLOAT(23.5 as f64), Token::EOF])
         );
         assert_eq!(
             tokenise("23.500"),
-            Ok(vec![Token::FLOAT("23.500"), Token::EOF])
+            Ok(vec![Token::FLOAT(23.500 as f64), Token::EOF])
         );
         assert_eq!(
             tokenise("0.05"),
-            Ok(vec![Token::FLOAT("0.05"), Token::EOF])
+            Ok(vec![Token::FLOAT(0.05 as f64), Token::EOF])
         );
     }
 
@@ -208,19 +208,19 @@ mod tests {
     fn tokenise_valid_scientific_format() {
         assert_eq!(
             tokenise("5e10"),
-            Ok(vec![Token::FLOAT("5e10"), Token::EOF])
+            Ok(vec![Token::FLOAT(5e10 as f64), Token::EOF])
         );
         assert_eq!(
             tokenise("20.0E3"),
-            Ok(vec![Token::FLOAT("20.0E3"), Token::EOF])
+            Ok(vec![Token::FLOAT(20.0E3 as f64), Token::EOF])
         );
         assert_eq!(
             tokenise("5e+1"),
-            Ok(vec![Token::FLOAT("5e+1"), Token::EOF])
+            Ok(vec![Token::FLOAT(5e+1 as f64), Token::EOF])
         );
         assert_eq!(
             tokenise("5e-10"),
-            Ok(vec![Token::FLOAT("5e-10"), Token::EOF])
+            Ok(vec![Token::FLOAT(5e-10 as f64), Token::EOF])
         );
     }
 }

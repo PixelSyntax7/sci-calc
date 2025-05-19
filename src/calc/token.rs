@@ -1,8 +1,8 @@
 #[derive(Debug, PartialEq, Clone)]
-pub enum Token<'a> {
-    INT(&'a str),
-    FLOAT(&'a str),
-    NAME(&'a str),
+pub enum Token {
+    INT(u64),
+    FLOAT(f64),
+    NAME(String),
     PLUS,
     MINUS,
     MUL,
