@@ -49,7 +49,7 @@ fn lexer_main() {
                 Ok(token) => {
                     println!("{:?}", token);
                     match token {
-                        Token::EOF(_) => break,
+                        Token::EOF => break,
                         _ => {}
                     };
                 }
