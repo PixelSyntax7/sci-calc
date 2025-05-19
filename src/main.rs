@@ -36,22 +36,24 @@ fn get_expression() -> String {
 
 #[allow(dead_code)]
 fn lexer_main() {
+    const EXIT_MSG: &str = ".exit";
+    println!("Use '{}' to exit!", EXIT_MSG);
+
     loop {
         let input = get_expression();
-        if input == String::from("exit") {
+        if input == EXIT_MSG {
             break;
         }
 
-        let mut lexer = Lexer::new(input.as_str());
+        let mut lexer = Lexer::new(input);
         loop {
             let result = lexer.next_token();
             match result {
                 Ok(token) => {
                     println!("{:?}", token);
-                    match token {
-                        Token::EOF => break,
-                        _ => {}
-                    };
+                    if let Token::EOF = token {
+                        break;
+                    }
                 }
                 Err(error) => {
                     eprintln!("Error: {:?}", error);
